@@ -1,0 +1,35 @@
+{
+  "name": "ratings-and-reviews",
+  "version": "1.0.0",
+  "description": "SDC Ratings and Reviews",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "db": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a -f database/schema.sql",
+    "login": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a",
+    "server": "nodemon server/server.js",
+    "killserver": "kill -9 $(lsof -t -i:4000)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Transplants/Ratings-and-Reviews.git"
+  },
+  "author": "Randall Stanford",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/The-Transplants/Ratings-and-Reviews/issues"
+  },
+  "homepage": "https://github.com/The-Transplants/Ratings-and-Reviews#readme",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "eslint": "^7.32.0",
+    "express": "^4.17.1",
+    "node": "^16.10.0",
+    "pg": "^8.7.1",
+    "postgresql-js": "^0.0.7"
+  },
+  "devDependencies": {
+    "jest": "^27.2.4",
+    "nodemon": "^2.0.13"
+  }
+}
