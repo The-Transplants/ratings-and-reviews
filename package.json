@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "db": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a -f database/schema.sql",
+    "server": "nodemon server",
+    "killserver": "kill -9 $(lsof -t -i:4000)",
     "login": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a",
-    "server": "nodemon server/server.js",
-    "killserver": "kill -9 $(lsof -t -i:4000)"
+    "db": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a -f database/schema.sql"
   },
   "repository": {
     "type": "git",
