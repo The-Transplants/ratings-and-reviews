@@ -1,13 +1,12 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const { Client } = require('pg');
 const { password } = require('../config/config');
 
-// const { report } = require('./controllers/report');
-// const { reviews } = require('./controllers/reviews-get');
-// const { helpful } = require('./controllers/helpful');
-// const { reviewPost } = require('./controllers/reviews-post');
 const {
-  reviewsMeta, reviews, report, reviewPost, helpful,
+  reviewsMeta, reviews, report, reviewPost, charsReviewPost, photosPost, charsPost, helpful,
 } = require('./controllers');
 
 const app = express();
@@ -29,17 +28,34 @@ client.connect((err) => {
 // Post
 app.post('/reviews/', (req, res) => {
   let {
-    product_id, rating, summary, body, recommend, email, name, photos, characteristics,
+    product_id, rating, summary,
+    body, reviewer_email,
+    reviewer_name, photos, characteristics,
   } = req.query;
 
-  recommend === 'true' ? recommend = !!recommend : recommend = !recommend;
-
-  client.query(reviewPost, [product_id, rating, summary, body, recommend, name, email])
-    .then(response => {
-      console.log(response);
-      res.send(response);
-    })
+  client.query(reviewPost, [product_id, rating, summary, body, reviewer_name, reviewer_email])
+    .then(() => console.log('review posted!'))
     .catch(err => console.log(err));
+
+  JSON.parse(photos).forEach((photo) => {
+    client.query(photosPost, [photo])
+      .then(() => console.log(`photo posted! url: ${photo}`))
+      .catch(err => console.log(err));
+  });
+
+  for (let key in JSON.parse(characteristics)) {
+    let currentVal = JSON.parse(characteristics)[key];
+
+    client.query(charsPost, [product_id, key])
+      .then(() => console.log(`posted chars with key: ${key}`))
+      .catch(err => console.log(err));
+
+    client.query(charsReviewPost, [currentVal])
+      .then(() => console.log(`charsReview posted with val: ${currentVal}`))
+      .catch(err => console.log(err));
+  }
+
+  res.send('CREATED');
 });
 
 // Get
@@ -48,9 +64,10 @@ app.get('/reviews/', (req, res) => {
     .then(response => res.send(response.rows[0].results))
     .catch(err => console.log(err));
 });
-app.get('/reviews/meta/:product_id', (req, res) => {
-  client.query(reviewsMeta, [req.params.product_id])
-    .then(response => res.send(response.rows))
+
+app.get('/reviews/meta/', (req, res) => {
+  client.query(reviewsMeta, [req.query.product_id])
+    .then(response => res.send(response.rows[0]))
     .catch(err => console.log(err));
 });
 
