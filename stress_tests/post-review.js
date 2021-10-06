@@ -5,7 +5,8 @@ const http = require('k6/http');
 const { sleep } = require('k6');
 
 export const options = {
-  stages: [{ duration: '10s', target: 500 }],
+  duration: '10s',
+  vus: 100,
 };
 
 export default function () {
@@ -25,7 +26,7 @@ export default function () {
       'Content-Type': 'application/json',
     },
   };
-  console.log(http);
-  http.post('http://localhost:4000/reviews/?product_id=5', payload, params);
+
+  http.post('http://localhost:4000/reviews/', payload, params);
   sleep(1);
 }
