@@ -100,3 +100,24 @@ GROUP BY characteristics.id;
 
 
 */
+
+CREATE FUNCTION json_merge(data json, merge_data json) RETURNS json LANGUAGE sql IMMUTABLE
+AS $$
+  SELECT json_object_agg(key, value)
+  FROM (
+    WITH to_merge AS (
+      SELECT * FROM json_each(merge_data)
+    )
+    SELECT *
+    FROM json_each(data)
+    WHERE key NOT IN (SELECT key FROM to_merge)
+    UNION ALL
+    SELECT * FROM to_merge
+  ) t;
+$$;
+
+CREATE AGGREGATE json_collect(json) (
+  SFUNC = json_merge,
+  STYPE = json,
+  INITCOND = '{}'
+);
