@@ -67,7 +67,7 @@ app.get('/reviews/', (req, res) => {
 
 app.get('/reviews/meta/', (req, res) => {
   client.query(reviewsMeta, [req.query.product_id])
-    .then(response => res.send(response.rows[0]))
+    .then(response => res.send(response.rows[0].data))
     .catch(err => console.log(err));
 });
 

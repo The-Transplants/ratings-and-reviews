@@ -50,42 +50,25 @@ SELECT jsonb_build_object(
       'false', (SELECT COUNT(recommend) FROM reviews WHERE recommend = false and product_id = $1)
     )
   ),
-  'characteristics', (SELECT array(SELECT json_build_object(
-    characteristics.name, json_build_object(
-      'id', characteristics.id,
-      'value', avg(characteristic_reviews.value)
+
+
+  'characteristics', ( SELECT array(
+    SELECT jsonb_build_object(
+      characteristics.name, json_build_object(
+        'id', characteristics.id,
+        'value', avg(characteristic_reviews.value)
+      )
     )
-  ) as characteristics
+    as characteristics
     FROM characteristics
     INNER JOIN characteristic_reviews
     ON characteristic_reviews.id = characteristic_reviews.characteristics_id
-    WHERE characteristics.product_id = $1
-    GROUP BY characteristics.id)
-  )
+    WHERE characteristics.product_id = 5
+    GROUP BY characteristics.id
+  ) )
+
+
 ) as data FROM reviews WHERE product_id = $1`;
-
-/*
-  WITH test(data) AS (
-  VALUES (char.name, json_build_object('id', char.id, 'value', avg(char_review.value)) as allChars
-      FROM characteristics as char
-      INNER JOIN characteristic_reviews AS char_review
-      ON char.id = char_review.characteristics_id
-      WHERE char.product_id = $1
-      GROUP BY char.id
-    )))
-SELECT (data->'Size') || (data->'Comfort') FROM test;
-
-'characteristic', (
-  SELECT concat(
-    char.name, json_build_object('id', char.id, 'value', avg(char_review.value))
-    )
-    FROM characteristics as char
-    INNER JOIN characteristic_reviews AS char_review
-    ON char.id = char_review.characteristics_id
-    WHERE char.product_id = $1
-    GROUP BY char.id
-    )
-*/
 
 // GET REVIEWS
 exports.reviews = `
@@ -104,7 +87,7 @@ exports.reviews = `
           SELECT jsonb_build_object(
             'id', id,
             'url', photo_url
-          ) FROM photos WHERE review_id = $1
+            ) FROM photos WHERE review_id = $1
         )
       )
     ) FROM reviews WHERE product_id = $1
