@@ -50,9 +50,75 @@ SELECT jsonb_build_object(
       'false', (SELECT COUNT(recommend) FROM reviews WHERE recommend = false and product_id = $1)
     )
   ),
+  'characteristics', (
+    SELECT (
+      json_object_agg(
+        name, jsonb_build_object(
+          'id', id,
+          'value', avg
+        )
+      )
+    )
+    FROM (SELECT char.name, char.id, avg(charreview.value)
+    FROM characteristics
+    AS char
+    INNER JOIN characteristic_reviews
+    AS charreview
+    ON char.id = charreview.characteristics_id
+    WHERE char.product_id = $1
+    GROUP BY char.id)
+    AS oohyeah )
+) as data FROM reviews WHERE product_id = $1`;
 
+// GET REVIEWS
+exports.reviews = `
+SELECT array(
+  SELECT json_build_object(
+    'product_id', product_id,
+    'rating', rating,
+    'summary', summary,
+    'recommend', recommend,
+    'body', body,
+    'date', review_date,
+    'reviewer_name', reviewer_name,
+    'helpfulness', helpfulness,
+    'photos', (
+      SELECT array(
+        SELECT json_build_object(
+          'id', id,
+          'url', photo_url
+        ) FROM photos WHERE id = reviews.id
+      )
+    )
+  ) FROM reviews WHERE product_id = $1
+) as results`;
 
-  'characteristics', ( SELECT array(
+/*
+
+  NEW -------------------------------------
+  (
+  SELECT (
+    json_object_agg(
+      name, jsonb_build_object(
+        'id', id,
+        value, avg
+      )
+    )
+  )
+  FROM (SELECT char.name, char.id, avg(charreview.value)
+  FROM characteristics
+  AS char
+  INNER JOIN characteristic_reviews
+  AS charreview
+  ON char.id = charreview.characteristics_id
+  WHERE char.product_id = 5
+  GROUP BY char.id)
+  AS oohyeah
+  )
+
+ OLD -------------------------------------
+
+ ( SELECT array(
     SELECT jsonb_build_object(
       characteristics.name, json_build_object(
         'id', characteristics.id,
@@ -65,30 +131,6 @@ SELECT jsonb_build_object(
     ON characteristic_reviews.id = characteristic_reviews.characteristics_id
     WHERE characteristics.product_id = 5
     GROUP BY characteristics.id
-  ) )
-
-
-) as data FROM reviews WHERE product_id = $1`;
-
-// GET REVIEWS
-exports.reviews = `
-  SELECT array(
-    SELECT jsonb_build_object(
-      'product_id', product_id,
-      'rating', rating,
-      'summary', summary,
-      'recommend', recommend,
-      'body', body,
-      'date', review_date,
-      'reviewer_name', reviewer_name,
-      'helpfulness', helpfulness,
-      'photos', (
-        SELECT array(
-          SELECT jsonb_build_object(
-            'id', id,
-            'url', photo_url
-            ) FROM photos WHERE review_id = $1
-        )
-      )
-    ) FROM reviews WHERE product_id = $1
-  ) as results`;
+    )
+  )
+*/

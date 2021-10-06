@@ -6,7 +6,8 @@ const { Client } = require('pg');
 const { password } = require('../config/config');
 
 const {
-  reviewsMeta, reviews, report, reviewPost, charsReviewPost, photosPost, charsPost, helpful,
+  reviewsMeta, reviews, report, reviewPost,
+  charsReviewPost, photosPost, charsPost, helpful,
 } = require('./controllers');
 
 const app = express();
@@ -22,7 +23,7 @@ const client = new Client({
 
 client.connect((err) => {
   if (err) throw err;
-  console.log('Connected!');
+  // console.log('Connected!');
 });
 
 // Post
@@ -61,7 +62,9 @@ app.post('/reviews/', (req, res) => {
 // Get
 app.get('/reviews/', (req, res) => {
   client.query(reviews, [req.query.product_id])
-    .then(response => res.send(response.rows[0].results))
+    .then(response => {
+      res.send(response.rows[0].results);
+    })
     .catch(err => console.log(err));
 });
 
