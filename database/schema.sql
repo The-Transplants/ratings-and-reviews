@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS reviews(
 
 -- CREATE INDEX IF NOT EXISTS id_index ON characteristics (id);
 
--- CREATE INDEX IF NOT EXISTS product_id_index ON characteristics (product_id);
+CREATE INDEX IF NOT EXISTS id_index ON reviews (id);
+CREATE INDEX IF NOT EXISTS photos_id_index ON photos (id);
 CREATE INDEX IF NOT EXISTS characteristics_id_index ON characteristic_reviews (characteristics_id);
 CREATE INDEX IF NOT EXISTS product_id_index ON reviews (product_id);
 CREATE INDEX IF NOT EXISTS recommend_index ON reviews (recommend);
