@@ -85,16 +85,72 @@ SELECT array(
     'photos', (
       SELECT array(
         SELECT json_build_object(
+          'id', photos.id,
+          'url', photos.photo_url
+        )
+      )
+    )
+  ) FROM reviews
+  INNER JOIN photos
+  ON reviews.id = photos.id
+  WHERE reviews.product_id = $1
+) as results`;
+
+
+
+  // SELECT json_build_object(
+  //   'product_id', product_id,
+  //   'rating', rating,
+  //   'summary', summary,
+  //   'recommend', recommend,
+  //   'body', body,
+  //   'date', review_date,
+  //   'reviewer_name', reviewer_name,
+  //   'helpfulness', helpfulness
+  //   'photo', json_build_object(
+  //     'id': photos.id,
+  //     'photo_url': photos.photo_url
+  //   )
+  // )
+  // FROM reviews
+  // INNER JOIN photos
+  // ON reviews.id = photos.id
+  // WHERE reviews.product_id = 5;
+
+
+/*
+SELECT array(
+  SELECT json_build_object(
+    'product_id', product_id,
+    'rating', rating,
+    'summary', summary,
+    'recommend', recommend,
+    'body', body,
+    'date', review_date,
+    'reviewer_name', reviewer_name,
+    'helpfulness', helpfulness,
+    'photos', (
+      SELECT array(
+        SELECT json_build_object(
           'id', id,
           'url', photo_url
         ) FROM photos WHERE id = reviews.id
       )
     )
   ) FROM reviews WHERE product_id = $1
-) as results`;
+) as results
+*/
+
+
+
+
+
+
+
+
 
 /*
-
+SELECT product_id, photo_url FROM photos INNER JOIN reviews ON photos.id = reviews.id;
   NEW -------------------------------------
   (
   SELECT (
