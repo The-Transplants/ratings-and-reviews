@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "server": "nodemon server",
-    "killserver": "kill -9 $(lsof -t -i:4000)",
+    "server": "nodemon index.js",
+    "start": "node server",
+    "killserver": "kill -9 $(lsof -t -i:1234)",
     "login": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a",
     "db": "PGPASSWORD=fish psql -h localhost -d postgres -U postgres -p 5432 -a -f database/schema.sql"
   },
