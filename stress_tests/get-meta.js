@@ -5,10 +5,10 @@ const http = require('k6/http');
 const { sleep } = require('k6');
 
 export const options = {
-  vus: 10,
+  vus: 500,
   duration: '10s',
 };
 export default function () {
-  http.get('http://localhost:4000/reviews/meta/?product_id=5');
+  http.get('http://localhost:3000/reviews/meta/?product_id=43215');
   sleep(1);
 }
