@@ -7,7 +7,7 @@ const app = express();
 
 const {
   postReview, getReview, reportReview, helpfulReview, getMetaReview,
-} = require('./controllers/controls');
+} = require('./controllers');
 
 // Post
 app.post('/reviews/', postReview);
