@@ -1,6 +1,6 @@
-CREATE DATABASE fishdb;
+CREATE DATABASE postgres;
 
-\c fishdb;
+\c postgres;
 
 CREATE SCHEMA IF NOT EXISTS public;
 
@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS characteristic_reviews(
   value int not null
 );
 
-COPY characteristic_reviews FROM '/seed/characteristic_reviews.csv' DELIMITER ',' CSV HEADER;
-COPY photos FROM '/seed/reviews_photos.csv' DELIMITER ',' CSV HEADER;
-COPY characteristics FROM '/seed/characteristics.csv' DELIMITER ',' CSV HEADER;
-COPY reviews FROM '/seed/reviews.csv' DELIMITER ',' CSV HEADER;
+-- \COPY characteristic_reviews FROM '__DEN14/__SDC/Ratings-and-Reviews/reviews/characteristic_reviews.csv' DELIMITER ',' CSV HEADER;
+-- \COPY photos FROM '__DEN14/__SDC/Ratings-and-Reviews/reviews/reviews_photos.csv' DELIMITER ',' CSV HEADER;
+-- \COPY characteristics FROM '__DEN14/__SDC/Ratings-and-Reviews/reviews/characteristics.csv' DELIMITER ',' CSV HEADER;
+-- \COPY reviews FROM '__DEN14/__SDC/Ratings-and-Reviews/reviews/reviews.csv' DELIMITER ',' CSV HEADER;
 
 CREATE INDEX IF NOT EXISTS id ON reviews (id);
 CREATE INDEX IF NOT EXISTS photos_id_index ON photos (id);
