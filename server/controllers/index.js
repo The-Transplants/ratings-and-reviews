@@ -1,98 +1,76 @@
-/* eslint-disable max-len */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable guard-for-in */
 
-// POST REVIEWS
-exports.reviewPost = `
-INSERT INTO reviews (
-  product_id, rating, review_date, summary, body,
-  recommend, reported, reviewer_name, reviewer_email
-) VALUES (
-  $1, $2, now(), $3, $4, false, false, $5, $6
-);
-`;
+const { Pool } = require('pg');
 
-exports.photosPost = `
-INSERT INTO photos (
-  review_id, photo_url
-) VALUES (
-  (SELECT MAX(id) FROM reviews), $1
-)`;
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'fish',
+  port: 5432,
+});
 
-exports.charsPost = `
-INSERT INTO characteristics (
-  product_id, name
-) VALUES (
-  $1, $2
-)`;
+const {
+  reviewsMeta, reviews, report, reviewPost,
+  charsReviewPost, photosPost, charsPost, helpful,
+} = require('./queries');
 
-exports.charsReviewPost = `
-INSERT INTO characteristic_reviews (
-  id, review_id, value, characteristics_id
-) VALUES (
-  (SELECT MAX(id) FROM characteristic_reviews) + 1,
-  (SELECT MAX(id) FROM reviews),
-  $1,
-  (SELECT MAX(id) FROM characteristics)
-)`;
+exports.postReview = (req, res) => {
+  console.log('sss');
+  let {
+    product_id, rating, summary,
+    body, reviewer_email,
+    reviewer_name, photos, characteristics,
+  } = req.query;
 
-// PUT REPORT
-exports.report = 'UPDATE reviews SET reported = true WHERE id = $1;';
+  pool.query(reviewPost, [product_id, rating, summary, body, reviewer_name, reviewer_email])
+    .then(() => console.log('review posted!'))
+    .catch(err => console.log(err));
 
-// PUT HELPFUL
-exports.helpful = 'UPDATE reviews SET helpfulness = helpfulness + 1 WHERE id = $1;';
+  JSON.parse(photos).forEach((photo) => {
+    pool.query(photosPost, [photo])
+      .then(() => console.log(`photo posted! url: ${photo}`))
+      .catch(err => console.log(err));
+  });
 
-// GET REVIEWS META
-exports.reviewsMeta = `
-SELECT jsonb_build_object(
-  'product_id', product_id,
-  'ratings', (SELECT jsonb_object_agg(counted.rating, counted.value) as ratings FROM (SELECT rating, COUNT(rating) as value FROM reviews WHERE product_id = $1 GROUP BY rating) as counted),
-  'recommend', (
-    SELECT jsonb_build_object(
-      'true', (SELECT COUNT(recommend) FROM reviews WHERE recommend = true and product_id = $1),
-      'false', (SELECT COUNT(recommend) FROM reviews WHERE recommend = false and product_id = $1)
-    )
-  ),
-  'characteristics', (
-    SELECT (
-      json_object_agg(
-        name, jsonb_build_object(
-          'id', id,
-          'value', avg
-        )
-      )
-    )
-    FROM (SELECT char.name, char.id, avg(charreview.value)
-    FROM characteristics
-    AS char
-    INNER JOIN characteristic_reviews
-    AS charreview
-    ON char.id = charreview.characteristics_id
-    WHERE char.product_id = $1
-    GROUP BY char.id)
-    AS oohyeah )
-) as data FROM reviews WHERE product_id = $1`;
+  for (let key in JSON.parse(characteristics)) {
+    let currentVal = JSON.parse(characteristics)[key];
 
-// GET REVIEWS
-exports.reviews = `
-SELECT array(
-  SELECT json_build_object(
-    'product_id', product_id,
-    'rating', rating,
-    'summary', summary,
-    'recommend', recommend,
-    'body', body,
-    'date', review_date,
-    'reviewer_name', reviewer_name,
-    'helpfulness', helpfulness,
-    'photos', (
-      SELECT array(
-        SELECT json_build_object(
-          'id', photos.id,
-          'url', photos.photo_url
-        )
-      )
-    )
-  ) FROM reviews
-  INNER JOIN photos
-  ON reviews.id = photos.id
-  WHERE reviews.product_id = $1
-) as results`;
+    pool.query(charsPost, [product_id, key])
+      .then(() => console.log(`posted chars with key: ${key}`))
+      .catch(err => console.log(err));
+
+    pool.query(charsReviewPost, [currentVal])
+      .then(() => console.log(`charsReview posted with val: ${currentVal}`))
+      .catch(err => console.log(err));
+  }
+
+  res.send('CREATED');
+};
+
+exports.getReview = (req, res) => {
+  pool.query(reviews, [req.query.product_id])
+    .then(response => {
+      res.send(response.rows[0]);
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getMetaReview = (req, res) => {
+  pool.query(reviewsMeta, [req.query.product_id])
+    .then(response => res.send(response.rows[0].data))
+    .catch(err => console.log(err));
+};
+
+exports.reportReview = (req, res) => {
+  pool.query(report, [req.params.review_id])
+    .then(() => res.send(200))
+    .catch(err => console.log(err));
+};
+
+exports.helpfulReview = (req, res) => {
+  pool.query(helpful, [req.params.review_id])
+    .then(() => res.sendStatus(200))
+    .catch(err => console.log(err));
+};
